@@ -43,6 +43,9 @@ class Field:
                         if mover.x == mover2.x and mover.y == mover2.y:
                             return True
         return False
+    
+    def reset(self):
+        self.movers = []
 
 
 class Mover:
@@ -199,3 +202,29 @@ class Target(Mover):
 
     def _decide_direction(self) -> Mover.Direction:
         return Mover.Direction(randint(0, 3))
+
+
+def run_a_episode(field: Field, hunters: list[Hunter], targets: list[Target]) -> int:
+    steps = 0
+    
+    # put agents
+    field.reset()
+    for hunter in hunters:
+        field.add_mover(hunter)
+        hunter.x = randint(0, field.width - 1)
+        hunter.y = randint(0, field.height - 1)
+        
+    for target in targets:
+        field.add_mover(target)
+        target.x = randint(0, field.width - 1)
+        target.y = randint(0, field.height - 1)
+    
+    # run
+    while not field.judge_caught():
+        for hunter in hunters:
+            hunter.learn()
+        for target in targets:
+            target.move()
+        steps += 1
+    
+    return steps
