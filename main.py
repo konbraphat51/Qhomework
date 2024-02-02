@@ -229,11 +229,10 @@ def run_a_episode(field: Field, hunters: list[Hunter], targets: list[Target]) ->
     
     return steps
 
-def run_bunch_episodes(perception):
+def run_bunch_episodes(
+                       hunters,
+                       targets):
     field = Field(10, 10)
-    hunters = [Hunter(0, 0, (perception, perception), QLearner([])),
-            Hunter(0, 0, (perception, perception), QLearner([]))]
-    targets = [Target(0, 0)]
     episodes = 1000
     steps = []
 
@@ -255,11 +254,17 @@ def get_averages(x, by):
         
     return averages, starts
 
-steps_2 = run_bunch_episodes(2)
+steps_2 = run_bunch_episodes([Hunter(0, 0, (2, 2), QLearner([])),
+            Hunter(0, 0, (2, 2), QLearner([]))],
+                             [Target(0, 0)])
 averages_2, starts = get_averages(steps_2, 50)
-steps_3 = run_bunch_episodes(3)
+steps_3 = run_bunch_episodes([Hunter(0, 0, (3, 3), QLearner([])),
+            Hunter(0, 0, (3, 3), QLearner([]))],
+                             [Target(0, 0)])
 averages_3, _ = get_averages(steps_3, 50)
-steps_4 = run_bunch_episodes(4)
+steps_4 = run_bunch_episodes([Hunter(0, 0, (4, 4), QLearner([])),
+            Hunter(0, 0, (4, 4), QLearner([]))],
+                             [Target(0, 0)])
 averages_4, _ = get_averages(steps_4, 50)
 
 plt.plot(starts, averages_2, label="perception 2")
@@ -283,4 +288,3 @@ class HunterRemembering(Hunter):
         self.perception_former = perception
         
         return perception
-    
