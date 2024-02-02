@@ -58,13 +58,20 @@ class Mover:
 
     def move(self, direction: Direction) -> None:
         if direction == self.Direction.UP:
-            self.y -= 1
+            if self._is_in_field(self.x, self.y - 1):
+                self.y -= 1
         elif direction == self.Direction.DOWN:
-            self.y += 1
+            if self._is_in_field(self.x, self.y + 1):
+                self.y += 1
         elif direction == self.Direction.LEFT:
-            self.x -= 1
+            if self._is_in_field(self.x - 1, self.y):
+                self.x -= 1
         elif direction == self.Direction.RIGHT:
-            self.x += 1
+            if self._is_in_field(self.x + 1, self.y):
+                self.x += 1
+            
+    def _is_in_field(self, x: int, y: int) -> bool:
+        return 0 <= x < Field.singleton.width and 0 <= y < Field.singleton.height
 
 
 class QLearner:
