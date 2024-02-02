@@ -142,6 +142,9 @@ class Hunter(Mover):
 
     def move(self) -> None:
         super().move(self._decide_direction())
+        
+    def learn(self) -> None:
+        self.q_leaner.learn(self._relative_to_stateId(self._percept()), self._q_action_callback)
 
     def _decide_direction(self) -> Mover.Direction:
         perception = self._percept()
