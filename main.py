@@ -308,3 +308,14 @@ class HunterRemembering(Hunter):
         self.perception_former = perception
 
         return perception
+
+steps_4_remembering = run_bunch_episodes(
+    [HunterRemembering(0, 0, (4, 4), QLearner([])), HunterRemembering(0, 0, (4, 4), QLearner([]))],
+    [Target(0, 0)],
+)
+averages_4_remembering, _ = get_averages(steps_4_remembering, 50)
+
+plt.plot(starts, averages_4_remembering, label="perception 4 remembering")
+
+plt.legend()
+plt.show()
