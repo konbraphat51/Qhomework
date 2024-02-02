@@ -138,12 +138,27 @@ class Hunter(Mover):
         super().__init__(x, y)
         self.perception_range = perception_range
 
+        self._prepare_q_learning(q_leaner)
+
     def move(self) -> None:
         super().move(self._decide_direction())
 
     def _decide_direction(self) -> Mover.Direction:
-        return Mover.Direction(randint(1, 4))
-
+        return self.q_leaner.decide_action(self._relative_to_stateId(self._perception()))
+    
+    def _prepare_q_learning(self, q_leaner: QLearner) -> None:
+        states_n = (self.perception_range * 2 + 1) ** 2
+        
+        states = []
+        for cnt in range(states_n):
+            states = QLearner.State(cnt, 4)
+            
+        q_leaner.states = states
+        
+        self.q_leaner = q_leaner
+        
+    def _relative_to_stateId(self, relative: tuple[int, int]) -> int:
+        return (relative[0] + self.perception_range) * (self.perception_range * 2 + 1) + (relative[1] + self.perception_range)
 
 class Target(Mover):
     def __init__(self, x, y):
