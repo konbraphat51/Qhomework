@@ -248,7 +248,7 @@ def run_a_episode(
 
 def run_bunch_episodes(hunters, targets):
     field = Field(10, 10)
-    episodes = 1000
+    episodes = 500
     steps = []
 
     for cnt in range(episodes):
@@ -298,16 +298,27 @@ class HunterRemembering(Hunter):
     ):
         super().__init__(x, y, perception_range, q_leaner)
         self.perception_former = None
+        self.guessing = False
 
     def _percept(self) -> tuple[int, int]:
         perception = super()._percept()
 
         if perception is None:
             perception = self.perception_former
+            self.guessing = True
+        else:
+            self.guessing = False
 
         self.perception_former = perception
 
         return perception
+    
+    def learn(self) -> None:
+        perception = self._percept()
+        if not self.guessing:
+            super().learn()
+        else:
+            self.move()
 
 steps_4_remembering = run_bunch_episodes(
     [HunterRemembering(0, 0, (4, 4), QLearner([])), HunterRemembering(0, 0, (4, 4), QLearner([]))],
