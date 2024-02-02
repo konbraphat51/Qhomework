@@ -265,5 +265,22 @@ averages_4, _ = get_averages(steps_4, 50)
 plt.plot(starts, averages_2, label="perception 2")
 plt.plot(starts, averages_3, label="perception 3")
 plt.plot(starts, averages_4, label="perception 4")
-plt.legend()
-plt.show()
+
+
+class HunterRemembering(Hunter):
+    def __init__(
+        self, x, y, perception_range: tuple[int, int], q_leaner: QLearner
+    ):
+        super().__init__(x, y, perception_range, q_leaner)
+        self.perception_former = None
+    
+    def _percept(self) -> tuple[int, int]:
+        perception = super()._percept()
+        
+        if perception is None:
+            perception = self.perception_former
+            
+        self.perception_former = perception
+        
+        return perception
+    
