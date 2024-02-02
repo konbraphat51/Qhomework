@@ -179,7 +179,7 @@ class Hunter(Mover):
             # last one is for "no target found"
             return len(self.q_leaner.states) - 1
         
-        id =  (relative[0] + self.perception_range) * (self.perception_range * 2 + 1) + (relative[1] + self.perception_range)
+        id =  (relative[0] + self.perception_range[0]) * (self.perception_range[1] * 2 + 1) + (relative[1] + self.perception_range[1])
 
         return id
 
