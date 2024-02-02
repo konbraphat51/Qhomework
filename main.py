@@ -4,6 +4,7 @@ from enum import Enum
 import math
 from matplotlib import pyplot as plt
 
+
 class Field:
     singleton = None
 
@@ -34,7 +35,7 @@ class Field:
                     return None
 
         raise Exception("No target found")
-    
+
     def judge_caught(self) -> bool:
         for mover in self.movers:
             if isinstance(mover, Hunter):
@@ -43,7 +44,7 @@ class Field:
                         if mover.x == mover2.x and mover.y == mover2.y:
                             return True
         return False
-    
+
     def reset(self):
         self.movers = []
 
@@ -72,9 +73,11 @@ class Mover:
         elif direction == self.Direction.RIGHT:
             if self._is_in_field(self.x + 1, self.y):
                 self.x += 1
-            
+
     def _is_in_field(self, x: int, y: int) -> bool:
-        return 0 <= x < Field.singleton.width and 0 <= y < Field.singleton.height
+        return (
+            0 <= x < Field.singleton.width and 0 <= y < Field.singleton.height
+        )
 
 
 class QLearner:
@@ -152,46 +155,57 @@ class Hunter(Mover):
 
     def move(self) -> None:
         super().move(self._decide_direction())
-        
+
     def learn(self) -> None:
-        self.q_leaner.learn(self._relative_to_stateId(self._percept()), self._q_action_callback)
+        self.q_leaner.learn(
+            self._relative_to_stateId(self._percept()), self._q_action_callback
+        )
 
     def _decide_direction(self) -> Mover.Direction:
         perception = self._percept()
-        return self.q_leaner.decide_action(self._relative_to_stateId(perception))
-    
+        return self.q_leaner.decide_action(
+            self._relative_to_stateId(perception)
+        )
+
     def _percept(self) -> tuple[int, int] | None:
-        return Field.singleton.give_perception(self.x, self.y, self.perception_range)
-    
+        return Field.singleton.give_perception(
+            self.x, self.y, self.perception_range
+        )
+
     def _prepare_q_learning(self, q_leaner: QLearner) -> None:
-        states_n = (self.perception_range[0] * 2 + 1) *  (self.perception_range[1] * 2 + 1) +1
-        
+        states_n = (self.perception_range[0] * 2 + 1) * (
+            self.perception_range[1] * 2 + 1
+        ) + 1
+
         states = []
         for cnt in range(states_n):
             states.append(QLearner.State(cnt, 4))
-            
+
         q_leaner.states = states
-        
+
         self.q_leaner = q_leaner
-        
+
     def _relative_to_stateId(self, relative: tuple[int, int] | None) -> int:
         if relative is None:
             # last one is for "no target found"
             return len(self.q_leaner.states) - 1
-        
-        id =  (relative[0] + self.perception_range[0]) * (self.perception_range[1] * 2 + 1) + (relative[1] + self.perception_range[1])
+
+        id = (relative[0] + self.perception_range[0]) * (
+            self.perception_range[1] * 2 + 1
+        ) + (relative[1] + self.perception_range[1])
 
         return id
 
     def _q_action_callback(self, action: int) -> tuple[float, int]:
         super().move(Mover.Direction(action))
-        
+
         caught = Field.singleton.judge_caught()
 
         if caught:
             return 1, self._relative_to_stateId((0, 0))
         else:
             return -0.1, self._relative_to_stateId(self._percept())
+
 
 class Target(Mover):
     def __init__(self, x, y):
@@ -204,21 +218,23 @@ class Target(Mover):
         return Mover.Direction(randint(0, 3))
 
 
-def run_a_episode(field: Field, hunters: list[Hunter], targets: list[Target]) -> int:
+def run_a_episode(
+    field: Field, hunters: list[Hunter], targets: list[Target]
+) -> int:
     steps = 0
-    
+
     # put agents
     field.reset()
     for hunter in hunters:
         field.add_mover(hunter)
         hunter.x = randint(0, field.width - 1)
         hunter.y = randint(0, field.height - 1)
-        
+
     for target in targets:
         field.add_mover(target)
         target.x = randint(0, field.width - 1)
         target.y = randint(0, field.height - 1)
-    
+
     # run
     while not field.judge_caught():
         for hunter in hunters:
@@ -226,20 +242,20 @@ def run_a_episode(field: Field, hunters: list[Hunter], targets: list[Target]) ->
         for target in targets:
             target.move()
         steps += 1
-    
+
     return steps
 
-def run_bunch_episodes(
-                       hunters,
-                       targets):
+
+def run_bunch_episodes(hunters, targets):
     field = Field(10, 10)
     episodes = 1000
     steps = []
 
     for cnt in range(episodes):
         steps.append(run_a_episode(field, hunters, targets))
-    
+
     return steps
+
 
 def get_averages(x, by):
     averages = []
@@ -249,22 +265,26 @@ def get_averages(x, by):
         starts.append(start)
         end = min(start + by, len(x))
         averages.append(sum(x[start:end]) / (end - start))
-        
+
         start = end
-        
+
     return averages, starts
 
-steps_2 = run_bunch_episodes([Hunter(0, 0, (2, 2), QLearner([])),
-            Hunter(0, 0, (2, 2), QLearner([]))],
-                             [Target(0, 0)])
+
+steps_2 = run_bunch_episodes(
+    [Hunter(0, 0, (2, 2), QLearner([])), Hunter(0, 0, (2, 2), QLearner([]))],
+    [Target(0, 0)],
+)
 averages_2, starts = get_averages(steps_2, 50)
-steps_3 = run_bunch_episodes([Hunter(0, 0, (3, 3), QLearner([])),
-            Hunter(0, 0, (3, 3), QLearner([]))],
-                             [Target(0, 0)])
+steps_3 = run_bunch_episodes(
+    [Hunter(0, 0, (3, 3), QLearner([])), Hunter(0, 0, (3, 3), QLearner([]))],
+    [Target(0, 0)],
+)
 averages_3, _ = get_averages(steps_3, 50)
-steps_4 = run_bunch_episodes([Hunter(0, 0, (4, 4), QLearner([])),
-            Hunter(0, 0, (4, 4), QLearner([]))],
-                             [Target(0, 0)])
+steps_4 = run_bunch_episodes(
+    [Hunter(0, 0, (4, 4), QLearner([])), Hunter(0, 0, (4, 4), QLearner([]))],
+    [Target(0, 0)],
+)
 averages_4, _ = get_averages(steps_4, 50)
 
 plt.plot(starts, averages_2, label="perception 2")
@@ -278,13 +298,13 @@ class HunterRemembering(Hunter):
     ):
         super().__init__(x, y, perception_range, q_leaner)
         self.perception_former = None
-    
+
     def _percept(self) -> tuple[int, int]:
         perception = super()._percept()
-        
+
         if perception is None:
             perception = self.perception_former
-            
+
         self.perception_former = perception
-        
+
         return perception
