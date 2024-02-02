@@ -51,10 +51,10 @@ class Mover:
         self.y = y
 
     class Direction(Enum):
-        UP = 1
-        DOWN = 2
-        LEFT = 3
-        RIGHT = 4
+        UP = 0
+        DOWN = 1
+        LEFT = 2
+        RIGHT = 3
 
     def move(self, direction: Direction) -> None:
         if direction == self.Direction.UP:
@@ -145,17 +145,13 @@ class Hunter(Mover):
 
     def _decide_direction(self) -> Mover.Direction:
         perception = self._percept()
-        if perception is None:
-            #randomly
-            return Mover.Direction(randint(1, 4))
-        else:
-            return self.q_leaner.decide_action(self._relative_to_stateId(perception))
+        return self.q_leaner.decide_action(self._relative_to_stateId(perception))
     
     def _percept(self) -> tuple[int, int] | None:
         return Field.singleton.give_perception(self.x, self.y, self.perception_range)
     
     def _prepare_q_learning(self, q_leaner: QLearner) -> None:
-        states_n = (self.perception_range * 2 + 1) ** 2
+        states_n = (self.perception_range * 2 + 1) ** 2 +1
         
         states = []
         for cnt in range(states_n):
@@ -165,8 +161,24 @@ class Hunter(Mover):
         
         self.q_leaner = q_leaner
         
-    def _relative_to_stateId(self, relative: tuple[int, int]) -> int:
-        return (relative[0] + self.perception_range) * (self.perception_range * 2 + 1) + (relative[1] + self.perception_range)
+    def _relative_to_stateId(self, relative: tuple[int, int] | None) -> int:
+        if relative is None:
+            # last one is for "no target found"
+            return len(self.q_leaner.states) - 1
+        
+        id =  (relative[0] + self.perception_range) * (self.perception_range * 2 + 1) + (relative[1] + self.perception_range)
+
+        return id
+
+    def _q_action_callback(self, action: int) -> tuple[float, int]:
+        super().move(Mover.Direction(action))
+        
+        caught = Field.singleton.judge_caught()
+
+        if caught:
+            return 1, self._relative_to_stateId((0, 0))
+        else:
+            return -0.1, self._relative_to_stateId(self._percept())
 
 class Target(Mover):
     def __init__(self, x, y):
@@ -176,4 +188,4 @@ class Target(Mover):
         super().move(self._decide_direction())
 
     def _decide_direction(self) -> Mover.Direction:
-        return Mover.Direction(randint(1, 4))
+        return Mover.Direction(randint(0, 3))
