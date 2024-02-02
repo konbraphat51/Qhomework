@@ -91,8 +91,8 @@ class QLearner:
         self,
         states: list[QLearner.State],
         leaning_rate: float = 0.8,
-        discount_factor: float = 0.9,
-        boltzmann_temperature_rate: float = 0.9999,
+        discount_factor: float = 0.2,
+        boltzmann_temperature_rate: float = 0.99999,
     ):
         self.states = states
         self.learning_rate = leaning_rate
@@ -248,7 +248,7 @@ def run_a_episode(
 
 def run_bunch_episodes(hunters, targets):
     field = Field(10, 10)
-    episodes = 500
+    episodes = 2000
     steps = []
 
     for cnt in range(episodes):
