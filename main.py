@@ -228,3 +228,15 @@ def run_a_episode(field: Field, hunters: list[Hunter], targets: list[Target]) ->
         steps += 1
     
     return steps
+
+# run bunch episodes
+field = Field(10, 10)
+hunters = [Hunter(0, 0, (2, 2), QLearner([])),
+           Hunter(0, 0, (2, 2), QLearner([]))]
+targets = [Target(0, 0)]
+episodes = 300
+steps = []
+
+for cnt in range(episodes):
+    steps.append(run_a_episode(field, hunters, targets))
+    
