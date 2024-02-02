@@ -89,7 +89,7 @@ class QLearner:
         states: list[QLearner.State],
         leaning_rate: float = 0.8,
         discount_factor: float = 0.9,
-        boltzmann_temperature_rate: float = 0.99,
+        boltzmann_temperature_rate: float = 0.9999,
     ):
         self.states = states
         self.learning_rate = leaning_rate
