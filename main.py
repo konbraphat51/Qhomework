@@ -144,7 +144,15 @@ class Hunter(Mover):
         super().move(self._decide_direction())
 
     def _decide_direction(self) -> Mover.Direction:
-        return self.q_leaner.decide_action(self._relative_to_stateId(self._perception()))
+        perception = self._percept()
+        if perception is None:
+            #randomly
+            return Mover.Direction(randint(1, 4))
+        else:
+            return self.q_leaner.decide_action(self._relative_to_stateId(perception))
+    
+    def _percept(self) -> tuple[int, int] | None:
+        return Field.singleton.give_perception(self.x, self.y, self.perception_range)
     
     def _prepare_q_learning(self, q_leaner: QLearner) -> None:
         states_n = (self.perception_range * 2 + 1) ** 2
