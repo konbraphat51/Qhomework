@@ -164,7 +164,7 @@ class Hunter(Mover):
         return Field.singleton.give_perception(self.x, self.y, self.perception_range)
     
     def _prepare_q_learning(self, q_leaner: QLearner) -> None:
-        states_n = (self.perception_range * 2 + 1) ** 2 +1
+        states_n = (self.perception_range[0] * 2 + 1) *  (self.perception_range[1] * 2 + 1) +1
         
         states = []
         for cnt in range(states_n):
