@@ -34,6 +34,15 @@ class Field:
                     return None
 
         raise Exception("No target found")
+    
+    def judge_caught(self) -> bool:
+        for mover in self.movers:
+            if isinstance(mover, Hunter):
+                for mover2 in self.movers:
+                    if isinstance(mover2, Target):
+                        if mover.x == mover2.x and mover.y == mover2.y:
+                            return True
+        return False
 
 
 class Mover:
