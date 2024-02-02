@@ -168,7 +168,7 @@ class Hunter(Mover):
         
         states = []
         for cnt in range(states_n):
-            states = QLearner.State(cnt, 4)
+            states.append(QLearner.State(cnt, 4))
             
         q_leaner.states = states
         
