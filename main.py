@@ -328,5 +328,26 @@ averages_4_remembering, _ = get_averages(steps_4_remembering, 50)
 
 plt.plot(starts, averages_4_remembering, label="perception 4 remembering")
 
+class HunterSharing(Hunter):
+    q_learner = None
+    
+    def __init__(
+        self, x, y, perception_range: tuple[int, int], q_leaner: QLearner
+    ):
+        if HunterSharing.q_learner is None:
+            HunterSharing.q_learner = q_leaner
+        else:
+            q_leaner = HunterSharing.q_learner
+        
+        super().__init__(x, y, perception_range, q_leaner)
+
+steps_4_sharing = run_bunch_episodes(
+    [HunterSharing(0, 0, (4, 4), QLearner([])), HunterSharing(0, 0, (4, 4), QLearner([]))],
+    [Target(0, 0)],
+)
+averages_4_sharing, _ = get_averages(steps_4_sharing, 50)
+
+plt.plot(starts, averages_4_sharing, label="perception 4 sharing")
+
 plt.legend()
 plt.show()
