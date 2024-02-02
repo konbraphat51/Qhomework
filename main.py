@@ -2,7 +2,7 @@ from __future__ import annotations
 from random import randint, random
 from enum import Enum
 import math
-
+from matplotlib import pyplot as plt
 
 class Field:
     singleton = None
@@ -229,14 +229,41 @@ def run_a_episode(field: Field, hunters: list[Hunter], targets: list[Target]) ->
     
     return steps
 
-# run bunch episodes
-field = Field(10, 10)
-hunters = [Hunter(0, 0, (2, 2), QLearner([])),
-           Hunter(0, 0, (2, 2), QLearner([]))]
-targets = [Target(0, 0)]
-episodes = 300
-steps = []
+def run_bunch_episodes(perception):
+    field = Field(10, 10)
+    hunters = [Hunter(0, 0, (perception, perception), QLearner([])),
+            Hunter(0, 0, (perception, perception), QLearner([]))]
+    targets = [Target(0, 0)]
+    episodes = 1000
+    steps = []
 
-for cnt in range(episodes):
-    steps.append(run_a_episode(field, hunters, targets))
+    for cnt in range(episodes):
+        steps.append(run_a_episode(field, hunters, targets))
     
+    return steps
+
+def get_averages(x, by):
+    averages = []
+    start = 0
+    starts = []
+    while start < len(x):
+        starts.append(start)
+        end = min(start + by, len(x))
+        averages.append(sum(x[start:end]) / (end - start))
+        
+        start = end
+        
+    return averages, starts
+
+steps_2 = run_bunch_episodes(2)
+averages_2, starts = get_averages(steps_2, 50)
+steps_3 = run_bunch_episodes(3)
+averages_3, _ = get_averages(steps_3, 50)
+steps_4 = run_bunch_episodes(4)
+averages_4, _ = get_averages(steps_4, 50)
+
+plt.plot(starts, averages_2, label="perception 2")
+plt.plot(starts, averages_3, label="perception 3")
+plt.plot(starts, averages_4, label="perception 4")
+plt.legend()
+plt.show()
